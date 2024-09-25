@@ -1,0 +1,36 @@
+<!-- Quantities -->
+
+<div>Soldiers: {{ faction.soldiers }}</div>
+
+<div>Population: {{ faction.population }}</div>
+
+<div>Money: {{ faction.money }}</div>
+
+<div>Food: {{ faction.food }}</div>
+
+<div>Metals: {{ faction.metals }}</div>
+
+<!-- Actions -->
+
+<div>Messages: 
+    <!--TODO display messages here [some sort of list..?]-->
+    {% for letter in letters %}
+        {{ letter.message }}
+    {% empty %}
+        No Letters
+    {% endfor %}
+</div>
+
+<div>Send Letter by Crow <!-- TODO Form to send letter by crow --></div>
+
+<div>Scouting: <!--TODO display scouting updates--></div>
+
+<div>Send Scout (will take from soldier pool) <!-- TODO Form to send scout --></div>
+
+<div>War Status <!-- TODO display both sides soldier count and time until completion --></div>
+
+<div>Initiate War <!-- TODO Form to attack faction --></div>
+
+<div>Trade Caravans <!-- TODO display cargo and timing --></div>
+
+<div>Initiate Trade <!-- TODO Form to send cargo and return with money from a faction or vice versa --></div>
