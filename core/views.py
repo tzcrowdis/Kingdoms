@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.http import JsonResponse
+import json
 
 from .models import *
 
@@ -45,10 +47,17 @@ User Actions
 """
 @login_required
 def send_crow_letter(request):
-    # TODO
-    # create a Letter model
-    pass
 
+    if request.method != "POST":
+        return JsonResponse({"error": "request must be POST"}, status=400)
+
+    data = json.loads(request.body)
+
+    # TODO get the data and create the letter object
+    # TODO also will need a js function to send the data
+
+    return JsonResponse({"success": "letter sent"}, status=200)
+        
 
 """
 Login / Register functions
