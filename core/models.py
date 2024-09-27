@@ -13,20 +13,28 @@ class Faction(models.Model):
     """
     ruler = models.ForeignKey("User", on_delete=models.CASCADE, related_name="faction")
 
-    #faction specifics
+    # faction specifics
     name = models.CharField(max_length=100, unique=True)
     capital_x = models.IntegerField()
     capital_y = models.IntegerField()
 
-    #resources
+    # resources
     population = models.IntegerField()
     soldiers = models.IntegerField()
     money = models.FloatField()
     food = models.FloatField()
     metals = models.FloatField()
 
-    #actions
-    #TODO track messages, trade, scouts, and wars
+    # actions
+    #TODO track messages (maybe dont want to track messages), trade, scouts, and wars
+
+
+class FactionKnowledge(models.Model):
+
+    # TODO: incorporate blocks on what they know
+
+    known = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="known")
+    knower = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowers")
 
 
 class Letter(models.Model):

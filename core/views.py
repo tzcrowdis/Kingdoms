@@ -34,11 +34,15 @@ def faction(request, faction):
         if time_elapsed_in_transit > letter.fly_time:
             arrived.append(letter)
 
+    # known factions
+    known_factions = faction.known.all()
+
     # TODO: filter other objects
 
     return render(request, "faction.html", {
         "faction": faction,
         "letters": arrived,
+        "known_factions": known_factions
         })
 
 
@@ -46,7 +50,7 @@ def faction(request, faction):
 User Actions
 """
 @login_required
-def send_crow_letter(request):
+def send_letter(request):
 
     if request.method != "POST":
         return JsonResponse({"error": "request must be POST"}, status=400)
