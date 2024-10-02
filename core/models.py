@@ -14,7 +14,7 @@ class Faction(models.Model):
     ruler = models.ForeignKey("User", on_delete=models.CASCADE, related_name="faction")
 
     # faction specifics
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True) # TODO convert white space to dashes -
     capital_x = models.IntegerField()
     capital_y = models.IntegerField()
 
@@ -33,8 +33,8 @@ class FactionKnowledge(models.Model):
 
     # TODO: incorporate blocks on what they know
 
-    known = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="known")
-    knower = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowers")
+    knower = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowns")
+    known = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowers")
 
 
 class Letter(models.Model):

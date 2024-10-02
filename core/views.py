@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -17,14 +17,19 @@ from django.utils import timezone
 Administrative Functions
 """
 def index(request):
+    print("index")
     if request.user.is_authenticated:
-        return faction(request, faction=Faction.objects.get(ruler=request.user))
+        faction_name = Faction.objects.get(ruler=request.user).name.replace(" ", "-") # replace avoids ugly urls
+        return redirect(faction, faction_name=faction_name)
     else:
         return HttpResponseRedirect(reverse("login"))
 
 
 @login_required
-def faction(request, faction):
+def faction(request,  faction_name):
+
+    # TODO handle errors does not exist and multiple objects returned
+    faction = Faction.objects.get(ruler=request.user) # HACK redundant look up but couldnt pass through due to url dispatch
 
     # filter letters to only show those that have arrived
     letters = Faction.objects.get(ruler=request.user).letters.all()
@@ -35,7 +40,8 @@ def faction(request, faction):
             arrived.append(letter)
 
     # known factions
-    known_factions = faction.known.all()
+    faction_knowledge = faction.knowns.all()
+    known_factions = [known.known for known in faction_knowledge]
 
     # TODO: filter other objects
 
@@ -49,18 +55,43 @@ def faction(request, faction):
 """
 User Actions
 """
-@login_required
-def send_letter(request):
+def send_crow_letter(request): # TODO fix this function not running on form submission
+
+    print("letter")
 
     if request.method != "POST":
-        return JsonResponse({"error": "request must be POST"}, status=400)
+        print("request must be POST")
+        return HttpResponseRedirect(reverse("index"))
+        #return JsonResponse({"error": "request must be POST"}, status=400)
 
-    data = json.loads(request.body)
+    if request.POST["recipient"] == "none":
+        print("no recipient selected")
+        return HttpResponseRedirect(reverse("index"))
+        #return JsonResponse({"error": "no recipient selected"}, status=400)
 
-    # TODO get the data and create the letter object
-    # TODO also will need a js function to send the data
+    try:
+        # get the data and create the letter object
+        # HACK a javascript method may be better
+        recipient_obj = Faction.objects.get(ruler=request.POST["recipient"])
+        recipient_loc = [recipient_obj.capital_x, recipient_obj.capital_y]
 
-    return JsonResponse({"success": "letter sent"}, status=200)
+        sender_obj = Faction.objects.get(ruler=request.user)
+        sender_loc = [sender_obj.capital_x, sender_obj.capital_y]
+
+        letter = Letter(
+            recipient = request.POST["recipient"],
+            fly_time = sim.crow_letter(sender=sender_loc, recipient=recipient_loc),
+            message = request.POST["message"]
+        )
+        letter.save()
+
+        print("successfully sent letter")
+        return HttpResponseRedirect(reverse("index"))
+        #return JsonResponse({"success": "letter sent"}, status=200)
+    except:
+        print("error couldn't send letter")
+        return HttpResponseRedirect(reverse("index"))
+        #return JsonResponse({"error": "couldn't send letter"}, status=400)
         
 
 """

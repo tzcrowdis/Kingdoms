@@ -13,5 +13,5 @@ urlpatterns = [
     path("<str:faction_name>", views.faction, name="faction"),
 
     # action post urls
-    path("send_letter", views.send_letter, name="send_letter"),
+    path("send_crow_letter", views.send_crow_letter, name="send_crow_letter"),
 ]

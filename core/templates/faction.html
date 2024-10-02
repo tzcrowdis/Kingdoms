@@ -12,31 +12,31 @@
 
 <!-- Actions -->
 
-<div>Messages: 
+<div>Messages: <br>
     <!--TODO display messages here [some sort of list..?]-->
     {% for letter in letters %}
-        {{ letter.message }}
+        {{ letter.message }} <br>
     {% empty %}
         No Letters
     {% endfor %}
 </div>
 
 <div>Send Letter by Crow <!-- TODO Finish form to send letter by crow -->
-    <form action="{% url 'send_letter' %}" method="post">
+    <form action="{% url 'send_crow_letter' %}" method="post">
         {% csrf_token %}
         <label for="recipient">Choose a recipient:</label>
-        <select name="recipient">
+        <select id="recipient" name="recipient">
             {% for known_fact in known_factions %}
                 <option value="{{ known_fact.ruler }}">{{ known_fact.ruler }} of {{ known_fact.name }}</option>
             {% empty %}
                 <option value="none">No Known Factions</option>
             {% endfor %}
         </select>
-
+        <br>
         <label for="message">Message:</label>
-        <textarea name="message" rows="10" cols="30"></textarea>
+        <textarea id="message" name="message" rows="10" cols="30"></textarea>
 
-        <input type="button" value="Send">
+        <input type="submit" value="Send">
     </form>
 </div>
 
