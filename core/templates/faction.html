@@ -13,7 +13,6 @@
 <!-- Actions -->
 
 <div>Messages: <br>
-    <!--TODO display messages here [some sort of list..?]-->
     {% for letter in letters %}
         {{ letter.message }} <br>
     {% empty %}
@@ -21,7 +20,7 @@
     {% endfor %}
 </div>
 
-<div>Send Letter by Crow <!-- TODO Finish form to send letter by crow -->
+<div>Send Letter by Crow
     <form action="{% url 'send_crow_letter' %}" method="post">
         {% csrf_token %}
         <label for="recipient">Choose a recipient:</label>

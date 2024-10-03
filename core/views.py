@@ -55,9 +55,7 @@ def faction(request,  faction_name):
 """
 User Actions
 """
-def send_crow_letter(request): # TODO fix this function not running on form submission
-
-    print("letter")
+def send_crow_letter(request):
 
     if request.method != "POST":
         print("request must be POST")
@@ -72,14 +70,15 @@ def send_crow_letter(request): # TODO fix this function not running on form subm
     try:
         # get the data and create the letter object
         # HACK a javascript method may be better
-        recipient_obj = Faction.objects.get(ruler=request.POST["recipient"])
+        recipient_user = User.objects.get(username=request.POST["recipient"])
+        recipient_obj = Faction.objects.get(ruler=recipient_user)
         recipient_loc = [recipient_obj.capital_x, recipient_obj.capital_y]
 
         sender_obj = Faction.objects.get(ruler=request.user)
         sender_loc = [sender_obj.capital_x, sender_obj.capital_y]
 
         letter = Letter(
-            recipient = request.POST["recipient"],
+            recipient = recipient_obj,
             fly_time = sim.crow_letter(sender=sender_loc, recipient=recipient_loc),
             message = request.POST["message"]
         )
@@ -88,11 +87,10 @@ def send_crow_letter(request): # TODO fix this function not running on form subm
         print("successfully sent letter")
         return HttpResponseRedirect(reverse("index"))
         #return JsonResponse({"success": "letter sent"}, status=200)
-    except:
-        print("error couldn't send letter")
+    except Exception as e:
+        print(e)
         return HttpResponseRedirect(reverse("index"))
-        #return JsonResponse({"error": "couldn't send letter"}, status=400)
-        
+        #return JsonResponse({"error": "couldn't send letter"}, status=400)     
 
 """
 Login / Register functions
