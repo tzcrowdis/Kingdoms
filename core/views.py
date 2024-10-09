@@ -17,7 +17,7 @@ from django.utils import timezone
 Administrative Functions
 """
 def index(request):
-    print("index")
+    # TODO have index and then faction accept a message variable to display success and error messages to users
     if request.user.is_authenticated:
         faction_name = Faction.objects.get(ruler=request.user).name.replace(" ", "-") # replace avoids ugly urls
         return redirect(faction, faction_name=faction_name)
@@ -60,12 +60,10 @@ def send_crow_letter(request):
     if request.method != "POST":
         print("request must be POST")
         return HttpResponseRedirect(reverse("index"))
-        #return JsonResponse({"error": "request must be POST"}, status=400)
 
     if request.POST["recipient"] == "none":
         print("no recipient selected")
         return HttpResponseRedirect(reverse("index"))
-        #return JsonResponse({"error": "no recipient selected"}, status=400)
 
     try:
         # get the data and create the letter object
@@ -86,11 +84,54 @@ def send_crow_letter(request):
 
         print("successfully sent letter")
         return HttpResponseRedirect(reverse("index"))
-        #return JsonResponse({"success": "letter sent"}, status=200)
     except Exception as e:
         print(e)
+        return HttpResponseRedirect(reverse("index"))   
+    
+
+def send_scout(request):
+
+    if request.method != "POST":
+        print("request must be POST")
         return HttpResponseRedirect(reverse("index"))
-        #return JsonResponse({"error": "couldn't send letter"}, status=400)     
+
+    faction = Faction.objects.get(ruler=request.user)
+
+    # scouts always start from the capital
+    starting_position = [faction.capital.x, faction.capital.y]
+
+    # translate the direction
+    if request.POSt["direction"] == "N": # TODO add to form
+        direction = (0, 1)
+    elif request.POSt["direction"] == "NE":
+        direction = (1, 1)
+    elif request.POSt["direction"] == "E":
+        direction = (1, 0)
+    elif request.POSt["direction"] == "SE":
+        direction = (1, -1)
+    elif request.POSt["direction"] == "S":
+        direction = (0, -1)
+    elif request.POSt["direction"] == "SW":
+        direction = (-1, -1)
+    elif request.POSt["direction"] == "W":
+        direction = (-1, 0)
+    elif request.POSt["direction"] == "NW":
+        direction = (-1, 1)
+    else:
+        print("must supply direction")
+        return HttpResponseRedirect(reverse("index"))
+    
+    # total trip (there and back) specified by user
+    trip_time = request.POST["time"] # TODO add to form
+
+    # returns a list of destinations in the form [(x, y), t]
+    # where t is the time to travel from the previous node to that one
+    itinerary = sim.scouting(start=starting_position, direction=direction, total_time=trip_time, dist_mod=faction.world.distance_modifier)
+
+    # TODO create scout object
+    
+    pass
+
 
 """
 Login / Register functions
@@ -148,10 +189,13 @@ def register(request):
 
         # attempt to create their faction
         try:
+            # TODO rework for land model
             faction_start_vals = sim.generate_starting_values(Faction.objects.count() + 1) # +1 because we are adding a faction
+            
             faction = Faction(
                 ruler = user,
                 name = faction_name,
+                # TODO rework for land model
                 capital_x = faction_start_vals["x"],
                 capital_y = faction_start_vals["y"],
                 population = faction_start_vals["population"],
