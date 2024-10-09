@@ -1,1 +1,1 @@
-A combination of a social network and strategy games like civilization.
+A combination of a social network and a strategy game like civilization.
