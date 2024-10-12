@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import datetime
+from django.utils import timezone
 
 
 """
@@ -130,22 +131,41 @@ def new_faction_position(n):
         return k, k - (m - n - t)
     
 
-"""
-start: datetime
-duration: amount to add to start time in sim time [hrs]
-return: the datetime
-"""
-def get_real_time(start, duration, time_mod):
+
+def get_real_timedelta(start, duration, time_mod):
+    """
+    Given a real time it converts a sim time duration to real time and adds it to it
+    start: real datetime
+    duration: amount to add to start time in sim time [hrs]
+    return: the real datetime
+    """
     return start + datetime.timedelta(hours = duration * time_mod)
 
 
-"""
-shows the population, soldiers, resources, battles etc of a land point at a given time
-rolls back time to view the land
-land: land object
-time: time land was visited
-return: dictionary of data
-"""
-# TODO
-def land_snapshot(land, time):
+def get_sim_time(world, time):
+    """
+    Given a real datetime, returns the simulations datetime
+    time: real datetime
+    return: sim datetime
+    """
+    # TODO 
+    # (datetime.now(tz=timezone.utc) - world.creation_time).total_seconds() * world.time_modifier
+    # from that make year, month, day...? 
+    # NOTE opportunity to make unique calendar system
     pass
+
+
+# TODO if this is to be more sophisticated we need to get the inverse of population growth, etc
+def land_snapshot(land, time):
+    """
+    shows the population, soldiers, resources, battles etc of a land point at a given time
+    rolls back time to view the land
+    land: land object
+    time: real time land was visited
+    return: dictionary of data
+    """
+    return {
+        "faction": land.owner.name,
+        "resource": land.get_resource(),
+        "time_visited": get_sim_time(land.world, time),
+    }

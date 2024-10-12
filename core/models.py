@@ -34,6 +34,13 @@ class Land(models.Model):
     )
     resource = models.CharField(choices=RESOURCES, max_length=2)
 
+    # TODO rework so RESOURCES is a dict (may have to change save function due to random.choice)
+    def get_resource(self):
+        if self.resource == "MT":
+            return "Metal"
+        else:
+            return "Food"
+
     # overwrite save() to randomly allocate resource to land on creation
     def save(self, *args, **kwargs):
         self.resource = random.choice(self.RESOURCES)[0]

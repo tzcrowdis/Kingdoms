@@ -190,7 +190,7 @@ def send_scout(request):
             scout_knowledge = ScoutKnowledge(
                 scout = scout,
                 land = Land.objects.get(x = place[0][0], y = place[0][1]),
-                visit_time = sim.get_real_time(start = start_time, duration = place[1], time_mod = time_modifier),
+                visit_time = sim.get_real_timedelta(start = start_time, duration = place[1], time_mod = time_modifier),
             )
             scout_knowledge.save()
             start_time = scout_knowledge.visit_time
