@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import datetime
 
 
 """
@@ -127,3 +128,24 @@ def new_faction_position(n):
         return -k + (m - n), k
     else:
         return k, k - (m - n - t)
+    
+
+"""
+start: datetime
+duration: amount to add to start time in sim time [hrs]
+return: the datetime
+"""
+def get_real_time(start, duration, time_mod):
+    return start + datetime.timedelta(hours = duration * time_mod)
+
+
+"""
+shows the population, soldiers, resources, battles etc of a land point at a given time
+rolls back time to view the land
+land: land object
+time: time land was visited
+return: dictionary of data
+"""
+# TODO
+def land_snapshot(land, time):
+    pass

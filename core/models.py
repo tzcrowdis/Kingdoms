@@ -5,6 +5,11 @@ import random
 
 
 """
+NOTE MODELS SHOULD ONLY STORE REAL TIMES NOT SIMULATION TIMES
+"""
+
+
+"""
 World models
 """
 class World(models.Model):
@@ -19,9 +24,10 @@ class Land(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
 
-    # TODO add other land speific fields (garrisoned soldiers, population, etc)
+    owner = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="lands")
+    # TODO consider adding other land speific fields (garrisoned soldiers, population, etc)
 
-    # TODO add resources
+    # TODO add more resource types
     RESOURCES = (
         ("MT", "Metal"),
         ("FD", "Food"),
@@ -61,17 +67,20 @@ class Faction(models.Model):
     metals = models.FloatField()
 
     # actions
-    #TODO track messages (maybe dont want to track messages), trade, scouts, and wars
+    #TODO track messages (maybe dont want to track messages), trade, scouts (on it), and wars
 
 
 class FactionKnowledge(models.Model):
+    # which factions know which
 
-    # TODO: incorporate blocks on what they know
-
+    # TODO: incorporate blocks on what they know?
     knower = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowns")
     known = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="knowers")
 
 
+"""
+Letters
+"""
 class Letter(models.Model):
     recipient = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="letters")
     send_time = models.DateTimeField(auto_now_add=True)
@@ -79,11 +88,17 @@ class Letter(models.Model):
     message = models.CharField(max_length=200)
 
 
+"""
+Scouts
+"""
 class Scout(models.Model):
-    completion_time = models.FloatField()
-    # TODO finish
+    faction = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="scouts")
+    leave_time = models.DateTimeField(auto_now_add=True)
+    return_time = models.DateTimeField() # TODO calculate the real time from simulation function
+    active = models.BooleanField()
 
 
 class ScoutKnowledge(models.Model):
     scout = models.ForeignKey("Scout", on_delete=models.CASCADE, related_name="scout_knowledge")
-    # TODO finish
+    land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="scouts_visited")
+    visit_time = models.DateTimeField() # for calculating the status of the faction at the time the scout visited

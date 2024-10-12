@@ -28,11 +28,12 @@ def index(request):
 @login_required
 def faction(request,  faction_name):
 
-    # TODO handle errors does not exist and multiple objects returned
+    # TODO handle the errors does not exist and multiple objects returned
     faction = Faction.objects.get(ruler=request.user) # HACK redundant look up but couldnt pass through due to url dispatch
 
     # filter letters to only show those that have arrived
-    letters = Faction.objects.get(ruler=request.user).letters.all()
+    #letters = Faction.objects.get(ruler=request.user).letters.all()
+    letters = faction.letters.all()
     arrived = []
     for letter in letters:
         time_elapsed_in_transit = (datetime.now(tz=timezone.utc) - letter.send_time).total_seconds()
@@ -43,12 +44,41 @@ def faction(request,  faction_name):
     faction_knowledge = faction.knowns.all()
     known_factions = [known.known for known in faction_knowledge]
 
+    # get all faction scouts
+    # check if scouts have returned
+    # then generate reports
+    scouts = faction.scouts.all()
+    
+    for scout in scouts:
+        if scout.active:
+            if datetime.now(tz=timezone.utc) > scout.return_time:
+                try:
+                    faction.soldiers += 1
+                    faction.save()
+
+                    scout.active = False
+                    scout.save()
+                except Exception as e:
+                    print("failed to return scout to soldier pool")
+                    print(e)
+    
+    scout_reports = []
+    for scout in scouts:
+        if scout.active:
+            continue
+
+        all_knowledge = scout.scout_knowledge.all()
+        for knowledge in all_knowledge:
+            scout_reports.append(sim.land_snapshot(knowledge.land, knowledge.visit_time))
+
+
     # TODO: filter other objects
 
     return render(request, "faction.html", {
         "faction": faction,
         "letters": arrived,
-        "known_factions": known_factions
+        "known_factions": known_factions,
+        "scout_reports": scout_reports,
         })
 
 
@@ -122,15 +152,56 @@ def send_scout(request):
         return HttpResponseRedirect(reverse("index"))
     
     # total trip (there and back) specified by user
-    trip_time = request.POST["time"] # TODO add to form
+    trip_time = request.POST["travel_time"] # TODO add to form
+    time_modifier = faction.world.time_modifier
 
     # returns a list of destinations in the form [(x, y), t]
     # where t is the time to travel from the previous node to that one
     itinerary = sim.scouting(start=starting_position, direction=direction, total_time=trip_time, dist_mod=faction.world.distance_modifier)
 
-    # TODO create scout object
+    # take scout from soldier pool
+    try:
+        faction.soldiers -= 1
+        faction.save()
+    except Exception as e:
+        print("failed to take scout from soldier pool")
+        print(e)
+        return HttpResponseRedirect(reverse("index"))
     
-    pass
+    # create scout object
+    try: 
+        start_time = datetime.now(tz=timezone.utc)
+        scout = Scout(
+            faction = faction,
+            # NOTE assumes the time the model is created and the sim function ran are approximately equal
+            return_time = sim.get_real_time(start = start_time, duration = trip_time, time_mod = time_modifier),
+            active = True,
+        )
+        scout.save()
+    except Exception as e:
+        print("failed to create scout")
+        print(e)
+        return HttpResponseRedirect(reverse("index"))
+    
+    # create scout knowledge from itinerary
+    try:
+        start_time = scout.leave_time
+        for place in itinerary:
+            scout_knowledge = ScoutKnowledge(
+                scout = scout,
+                land = Land.objects.get(x = place[0][0], y = place[0][1]),
+                visit_time = sim.get_real_time(start = start_time, duration = place[1], time_mod = time_modifier),
+            )
+            scout_knowledge.save()
+            start_time = scout_knowledge.visit_time
+
+    except Exception as e:
+        print("failed to create scout knowledge")
+        print(e)
+        return HttpResponseRedirect(reverse("index"))
+    
+    print("successfully sent scout")
+    return HttpResponseRedirect(reverse("index"))
 
 
 """

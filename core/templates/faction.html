@@ -12,6 +12,7 @@
 
 <!-- Actions -->
 
+<!-- Crow Letters -->
 <div>Messages: <br>
     {% for letter in letters %}
         {{ letter.message }} <br>
@@ -24,7 +25,7 @@
     <form action="{% url 'send_crow_letter' %}" method="post">
         {% csrf_token %}
         <label for="recipient">Choose a recipient:</label>
-        <select id="recipient" name="recipient">
+        <select id="recipient"> <!-- TODO removed name="recipient", make sure that's ok -->
             {% for known_fact in known_factions %}
                 <option value="{{ known_fact.ruler }}">{{ known_fact.ruler }} of {{ known_fact.name }}</option>
             {% empty %}
@@ -34,14 +35,36 @@
         <br>
         <label for="message">Message:</label>
         <textarea id="message" name="message" rows="10" cols="30"></textarea>
-
         <input type="submit" value="Send">
     </form>
 </div>
 
-<div>Scouting: <!--TODO display scouting updates--></div>
+<!-- Scouting -->
+<div>Scouting Reports: <!-- TODO display Reports --></div>
 
-<div>Send Scout (will take from soldier pool) <!-- TODO Form to send scout --></div>
+<div>Send Scout
+    <form action="{% url '' %}" method="post">
+        {% csrf_token %}
+        <label for="direction">Choose a direction:</label>
+        <select id="direction">
+            <option value="N">North</option>
+            <option value="NE">North East</option>
+            <option value="E">East</option>
+            <option value="SE">South East</option>
+            <option value="S">South</option>
+            <option value="SW">South West</option>
+            <option value="W">West</option>
+            <option value="NW">North West</option>
+        </select>
+        <br>
+        <!-- TODO should this be a real time? So user specifies time scout comes back (could add randomness to when they actually arrive)-->
+        <label for="travel_time">Total Travel Time (in hours)(includes there and back)</label>
+        <input type="number" step="0.01" min="0" id="travel_time">
+        <br>
+        Warning: Scout will be chosen from your Soldier pool!
+        <input type="submit" value="Send Scout">
+    </form>
+</div>
 
 <div>War Status <!-- TODO display both sides soldier count and time until completion --></div>
 
