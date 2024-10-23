@@ -3,6 +3,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("login", views.login_view, name="login"),
+    path("logout", views.logout_view, name="logout"),
+    path("register", views.register, name="register"),
+
     # action post urls
     path("send_letter", views.send_crow_letter, name="send_crow_letter"),
 
@@ -11,7 +15,4 @@ urlpatterns = [
 
     # bureaucratic
     path("", views.index, name="index"),
-    path("login", views.login_view, name="login"),
-    path("logout", views.logout_view, name="logout"),
-    path("register", views.register, name="register"),
 ]
