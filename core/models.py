@@ -1,7 +1,11 @@
 from django.db import models
+from django import forms
 from django.contrib.auth.models import AbstractUser
+from django_json_widget.widgets import JSONEditorWidget
 
 import random
+
+
 
 
 """
@@ -24,7 +28,7 @@ class Land(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
 
-    owner = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="lands")
+    owner = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="lands", null=True, blank=True)
     # TODO consider adding other land speific fields (garrisoned soldiers, population, etc)
 
     # TODO add more resource types
@@ -102,10 +106,41 @@ class Scout(models.Model):
     faction = models.ForeignKey("Faction", on_delete=models.CASCADE, related_name="scouts")
     leave_time = models.DateTimeField(auto_now_add=True)
     return_time = models.DateTimeField() # TODO calculate the real time from simulation function
-    active = models.BooleanField()
+    active = models.BooleanField(default=False)
 
 
 class ScoutKnowledge(models.Model):
     scout = models.ForeignKey("Scout", on_delete=models.CASCADE, related_name="scout_knowledge")
     land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="scouts_visited")
     visit_time = models.DateTimeField() # for calculating the status of the faction at the time the scout visited
+
+""" 
+Caravan
+"""
+
+
+class Caravan(models.Model):
+
+    domestic_cargo = models.JSONField()
+
+    domestic_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="domestic_caravan")
+    foreign_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="foreign_caravan")
+
+    departure_time = models.DateTimeField(auto_now_add=True)
+    return_time = models.DateTimeField(null=True, blank=True)
+
+    def create_caravan(self, domestic_cargo, domestic_land, foreign_land):
+        caravan = self.create(domestic_cargo=domestic_cargo, domestic_land=domestic_land, foreign_land=foreign_land)
+        return caravan
+
+    def get_resource(self):
+        return Caravan.RESOURCES[self.resource]
+
+#Custom admin form for caravan
+class caravanModelForm(forms.ModelForm):
+    class Meta:
+        model = Caravan
+        fields = '__all__'
+        widgets = {
+            'domestic_cargo': JSONEditorWidget(),
+        }
