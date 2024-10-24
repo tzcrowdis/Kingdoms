@@ -135,4 +135,5 @@ class caravanModelForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'domestic_cargo': JSONEditorWidget(),
+            'foreign_cargo': JSONEditorWidget(),
         }
