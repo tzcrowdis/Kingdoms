@@ -122,19 +122,13 @@ Caravan
 class Caravan(models.Model):
 
     domestic_cargo = models.JSONField()
+    foreign_cargo = models.JSONField()
 
-    domestic_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="domestic_caravan")
-    foreign_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="foreign_caravan")
+    domestic_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="domestic_caravans")
+    foreign_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="foreign_caravans")
 
     departure_time = models.DateTimeField(auto_now_add=True)
-    return_time = models.DateTimeField(null=True, blank=True)
-
-    def create_caravan(self, domestic_cargo, domestic_land, foreign_land):
-        caravan = self.create(domestic_cargo=domestic_cargo, domestic_land=domestic_land, foreign_land=foreign_land)
-        return caravan
-
-    def get_resource(self):
-        return Caravan.RESOURCES[self.resource]
+    return_time = models.IntegerField(null=True, blank=True)
 
 #Custom admin form for caravan
 class caravanModelForm(forms.ModelForm):
