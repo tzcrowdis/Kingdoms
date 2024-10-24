@@ -117,8 +117,6 @@ class ScoutKnowledge(models.Model):
 """ 
 Caravan
 """
-
-
 class Caravan(models.Model):
 
     domestic_cargo = models.JSONField()
@@ -128,7 +126,7 @@ class Caravan(models.Model):
     foreign_land = models.ForeignKey("Land", on_delete=models.CASCADE, related_name="foreign_caravans")
 
     departure_time = models.DateTimeField(auto_now_add=True)
-    return_time = models.IntegerField(null=True, blank=True)
+    hours_traveled = models.IntegerField(null=True, blank=True)
 
 #Custom admin form for caravan
 class caravanModelForm(forms.ModelForm):
