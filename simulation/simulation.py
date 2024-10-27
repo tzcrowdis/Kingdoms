@@ -1,7 +1,6 @@
 import math
 import numpy as np
-import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
 
 
 """
@@ -102,15 +101,18 @@ def generate_starting_values(num_factions):
 
 
 """
-TODO rewrite as this will only be picking next land to search
-New Faction Position
-returns the position of the capital of the new user
-operates like a grid spiral search doing one iteration each time a new faction is created
-source: https://medium.com/acrossthegalaxy/grid-spiral-search-formula-3b476bfdd2df
-n: the number of factions that already exist (works like an index)
-return: coordinates of faction capital
+Land Functions
 """
 def new_faction_position(n):
+    """
+    TODO rewrite as this will only be picking next land to search
+    New Faction Position
+    returns the position of the capital of the new user
+    operates like a grid spiral search doing one iteration each time a new faction is created
+    source: https://medium.com/acrossthegalaxy/grid-spiral-search-formula-3b476bfdd2df
+    n: the number of factions that already exist (works like an index)
+    return: coordinates of faction capital
+    """
     k = math.ceil((math.sqrt(n) - 1) / 2)
     t = 2 * k
     m = (t + 1) ** 2
@@ -129,33 +131,9 @@ def new_faction_position(n):
         return -k + (m - n), k
     else:
         return k, k - (m - n - t)
-    
 
 
-def get_real_timedelta(start, duration, time_mod):
-    """
-    Given a real time it converts a sim time duration to real time and adds it to it
-    start: real datetime
-    duration: amount to add to start time in sim time [hrs]
-    return: the real datetime
-    """
-    return start + datetime.timedelta(hours = duration * time_mod)
-
-
-def get_sim_time(world, time):
-    """
-    Given a real datetime, returns the simulations datetime
-    time: real datetime
-    return: sim datetime
-    """
-    # TODO 
-    # (datetime.now(tz=timezone.utc) - world.creation_time).total_seconds() * world.time_modifier
-    # from that make year, month, day...? 
-    # NOTE opportunity to make unique calendar system
-    pass
-
-
-# TODO if this is to be more sophisticated we need to get the inverse of population growth, etc
+# NOTE if this is to be more sophisticated we need to get the inverse of population growth, etc
 def land_snapshot(land, time):
     """
     shows the population, soldiers, resources, battles etc of a land point at a given time
@@ -169,3 +147,52 @@ def land_snapshot(land, time):
         "resource": land.get_resource(),
         "time_visited": get_sim_time(land.world, time),
     }
+    
+
+"""
+Time Functions
+"""
+def get_real_timedelta(start, duration, time_mod):
+    """
+    Given a real time it converts a sim time duration to real time and adds it to it
+    start: real datetime
+    duration: amount to add to start time in sim time [hrs]
+    return: the real datetime
+    """
+    return start + datetime.timedelta(hours = duration * time_mod)
+
+
+def get_real_time():
+    # TODO ?
+    pass
+
+
+def get_sim_time(world, time):
+    """
+    Given a real datetime, returns the simulations datetime
+    time: real datetime
+    return: sim datetime
+    """
+    # world age is how old the world is in secons
+    world_age = (time - world.creation_time).total_seconds() * world.time_modifier # TODO need to iron out time modifier functionality
+    
+    # from world_age make year, month, day, approximate hour
+    year_seconds = 31540000 # 31,540,000 seconds in a year
+    month_seconds = 2628000 # 2,628,000 seconds in a month
+    day_seconds = 86400 # 86,400 seconds in a day
+    hour_seconds = 3600 # 3,600 seconds in an hour
+
+    year = world_age /  year_seconds
+    world_age %= year_seconds
+    month = world_age / month_seconds
+    world_age %=  month_seconds
+    day = world_age / day_seconds
+    world_age %= day_seconds
+    hour = world_age / hour_seconds
+
+    return f"{year}/{month}/{day}/{hour}"
+
+
+def get_sim_time_delta():
+    # TODO
+    pass
